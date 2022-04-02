@@ -1,8 +1,8 @@
-package org.openid4java;
+package org.openid4java.samples;
 
 import org.openid4java.consumer.ConsumerManager;
 
-public class FootTest {
+public class SteamLoginDevelopmentHelper {
 
     public static void main(String[] args) {
         try {
