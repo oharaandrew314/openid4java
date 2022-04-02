@@ -11,6 +11,7 @@ import org.openid4java.association.Association;
 import org.openid4java.server.RealmVerifier;
 
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -247,12 +248,9 @@ public class AuthRequest extends Message
         }
 
         // return_to must be a valid URL, if present
-        try
-        {
-            if (getReturnTo() != null)
-                new URL(getReturnTo());
-        } catch (MalformedURLException e)
-        {
+        try {
+            if (getReturnTo() != null) URI.create(getReturnTo());
+        } catch (IllegalArgumentException e) {
             throw new MessageException(
                 "Error verifying return URL in auth request.",
                 OpenIDException.AUTH_ERROR, e);

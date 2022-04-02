@@ -11,6 +11,7 @@ import org.openid4java.discovery.DiscoveryException;
 import org.openid4java.discovery.DiscoveryInformation;
 import org.openid4java.discovery.yadis.YadisResolver;
 
+import java.net.URI;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -214,12 +215,12 @@ public class RealmVerifier
         if (DEBUG) _log.debug("Verifying realm: " + realm +
                               " on return URL: " + returnTo);
 
-        URL realmUrl;
+        URI realmUrl;
         try
         {
-            realmUrl = new URL(realm);
+            realmUrl = URI.create(realm);
         }
-        catch (MalformedURLException e)
+        catch (IllegalArgumentException e)
         {
             _log.error("Invalid realm URL: " + realm, e);
             return MALFORMED_REALM;
@@ -233,25 +234,24 @@ public class RealmVerifier
             return DENIED_REALM;
         }
 
-        URL returnToUrl;
+        URI returnToUrl;
         try
         {
-            returnToUrl = new URL(returnTo);
+            returnToUrl = URI.create(returnTo);
         }
-        catch (MalformedURLException e)
+        catch (IllegalArgumentException e)
         {
             _log.error("Invalid return URL: " + returnTo);
             return MALFORMED_RETURN_TO_URL;
         }
 
-        if (realmUrl.getRef() != null)
-        {
+        if (realmUrl.getFragment() != null) {
             if (DEBUG) _log.debug("Realm verification failed: " +
                                   "URL fragments are not allowed.");
             return FRAGMENT_NOT_ALLOWED;
         }
 
-        if (!realmUrl.getProtocol().equalsIgnoreCase(returnToUrl.getProtocol()))
+        if (!realmUrl.getScheme().equalsIgnoreCase(returnToUrl.getScheme()))
         {
             if (DEBUG) _log.debug("Realm verification failed: " +
                                   "protocol mismatch.");
@@ -297,18 +297,8 @@ public class RealmVerifier
         return false;
     }
 
-    private boolean portMatch(URL realmUrl, URL returnToUrl)
-    {
-        int realmPort = realmUrl.getPort();
-        int returnToPort  = returnToUrl.getPort();
-
-        if (realmPort == -1)
-            realmPort = realmUrl.getDefaultPort();
-
-        if (returnToPort == -1)
-            returnToPort = returnToUrl.getDefaultPort();
-
-        return realmPort == returnToPort;
+    private boolean portMatch(URI realmUrl, URI returnToUrl) {
+        return realmUrl.getPort() == returnToUrl.getPort();
     }
 
     /**
@@ -318,7 +308,7 @@ public class RealmVerifier
      * @param returnToUrl
      * @return If equals or a sub-direcotory return true.
      */
-    private boolean pathMatch(URL realmUrl, URL returnToUrl)
+    private boolean pathMatch(URI realmUrl, URI returnToUrl)
     {
         String realmPath = realmUrl.getPath();
         String returnToPath  = returnToUrl.getPath();

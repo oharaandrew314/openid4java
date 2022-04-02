@@ -1,12 +1,14 @@
 package org.openid4java.consumer;
 
 import junit.framework.TestCase;
+import org.assertj.core.api.Assertions;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.AbstractHandler;
 import org.openid4java.association.AssociationSessionType;
 import org.openid4java.discovery.DiscoveryInformation;
 import org.openid4java.message.AssociationResponse;
+import org.openid4java.message.AuthRequest;
 import org.openid4java.message.Parameter;
 import org.openid4java.message.ParameterList;
 
@@ -21,17 +23,15 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-//import edu.emory.mathcs.backport.java.util.Collections;
-
 public class ConsumerManagerTest extends TestCase {
 	private MockOpenIDServer server;
 	private ConsumerManager manager;
-	
+
 	public void setUp() throws Exception {
 		manager = new ConsumerManager();
 		server = MockOpenIDServer.createAndStart();
 	}
-	
+
 	public void tearDown() throws Exception {
 		if(server != null) {
 			server.stop();
@@ -47,6 +47,26 @@ public class ConsumerManagerTest extends TestCase {
 		Map request = (Map)server.getRequestParams().get(0);
 		assertEquals(manager.getPrefAssocSessEnc().getAssociationType(),((String[])request.get("openid.assoc_type"))[0]);
 		assertEquals(manager.getPrefAssocSessEnc().getSessionType(),((String[])request.get("openid.session_type"))[0]);
+	}
+
+	public void testAuthenticate() throws Exception {
+		manager.setPrefAssocSessEnc(AssociationSessionType.DH_SHA1);
+		DiscoveryInformation disc = new DiscoveryInformation(new URL(server.createAbsoluteUrl("/op/endpoint")), null);
+		DiscoveryInformation info = manager.associate(Collections.singletonList(disc));
+
+		final AuthRequest result = manager.authenticate(info, "http://foo.bar/callback");
+		final var uri = result.getDestinationUrl(true);
+		Assertions.assertThat(uri).contains("openid.return_to=http%3A%2F%2Ffoo.bar%2Fcallback");
+	}
+
+	public void testAuthenticateNonHttpUri() throws Exception {
+		manager.setPrefAssocSessEnc(AssociationSessionType.DH_SHA1);
+		DiscoveryInformation disc = new DiscoveryInformation(new URL(server.createAbsoluteUrl("/op/endpoint")), null);
+		DiscoveryInformation info = manager.associate(Collections.singletonList(disc));
+
+		final AuthRequest result = manager.authenticate(info, "nativeapp://callback");
+		final var uri = result.getDestinationUrl(true);
+		Assertions.assertThat(uri).contains("openid.return_to=nativeapp%3A%2F%2Fcallback");
 	}
 	
 	private static class MockOpenIDServer extends Server {
