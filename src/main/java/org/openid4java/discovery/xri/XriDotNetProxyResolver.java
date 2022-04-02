@@ -35,7 +35,6 @@ public class XriDotNetProxyResolver implements XriResolver
     private final static String PROXY_URL = "https://xri.net/";
     private static final String XRDS_QUERY = "_xrd_r=application/xrds+xml";
 
-    private static final String XRDS_PARSER_CLASS_NAME_KEY = "discovery.xrds.parser";
     private static final XrdsParser XRDS_PARSER = new XrdsParserImpl();
 
     /**

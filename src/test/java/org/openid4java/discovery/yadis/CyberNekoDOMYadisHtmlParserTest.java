@@ -5,11 +5,12 @@
 package org.openid4java.discovery.yadis;
 
 import junit.framework.TestCase;
-import org.apache.commons.io.IOUtils;
-import org.openid4java.discovery.html.CyberNekoDOMHtmlParserTest;
 
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @author Sutra Zhou
@@ -38,35 +39,21 @@ public class CyberNekoDOMYadisHtmlParserTest extends TestCase
      */
     public final void testGetHtmlMetaIssue83() throws IOException, YadisException
     {
-        String htmlData = getResourceAsString("issue83.html");
+        String htmlData = loadResource("issue83.html");
         String s = parser.getHtmlMeta(htmlData);
         assertEquals("http://edevil.livejournal.com/data/yadis", s);
     }
 
     public void testParseHtmlMetaXXE() throws Exception {
-        parser.getHtmlMeta(IOUtils.toString(CyberNekoDOMHtmlParserTest.class.getClassLoader().getResourceAsStream(
-                "identityPageWithExternalEntityReference.html")));
+        parser.getHtmlMeta(loadResource("identityPageWithExternalEntityReference.html"));
         // don't fail trying to read "/path/to/some/file" from the input data
     }
 
-    /**
-     * Read the resource as string.
-     * 
-     * @param name
-     *            the resource name
-     * @return a string
-     * @throws IOException
-     *             if an I/O error occurs
-     */
-    private String getResourceAsString(String name) throws IOException
-    {
-        InputStream inputStream = CyberNekoDOMYadisHtmlParserTest.class.getClassLoader().getResourceAsStream(name);
-        try
-        {
-            return IOUtils.toString(inputStream);
-        } finally
-        {
-            inputStream.close();
+    private String loadResource(String name) throws IOException{
+        final var resource = Objects.requireNonNull(getClass().getClassLoader().getResource(name));
+
+        try(final var reader = new BufferedReader(new InputStreamReader(resource.openStream()))) {
+            return reader.lines().collect(Collectors.joining("\n"));
         }
     }
 }

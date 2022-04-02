@@ -140,17 +140,24 @@ public class ConsumerManager
     /**
      * Instantiates a ConsumerManager with default settings.
      */
-    public ConsumerManager()
-    {
+    public ConsumerManager() {
         this(
             new RealmVerifierFactory(new YadisResolver(new HttpFetcherFactory())),
             new Discovery(),  // uses HttpCache internally
-            new HttpFetcherFactory());
+            new HttpFetcherFactory()
+        );
     }
 
-    public ConsumerManager(RealmVerifierFactory realmFactory, Discovery discovery,
-        HttpFetcherFactory httpFetcherFactory)
-    {
+    public ConsumerManager(Discovery discovery) {
+        this(
+                new RealmVerifierFactory(new YadisResolver(new HttpFetcherFactory())),
+                discovery,
+                new HttpFetcherFactory()
+        );
+    }
+
+
+    public ConsumerManager(RealmVerifierFactory realmFactory, Discovery discovery, HttpFetcherFactory httpFetcherFactory) {
         _realmVerifier = realmFactory.getRealmVerifierForConsumer();
         // don't verify own (RP) identity, disable RP discovery
         _realmVerifier.setEnforceRpId(false);

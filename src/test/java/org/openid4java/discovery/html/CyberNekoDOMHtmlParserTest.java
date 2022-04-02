@@ -5,10 +5,13 @@
 package org.openid4java.discovery.html;
 
 import junit.framework.TestCase;
-import org.apache.commons.io.IOUtils;
 import org.openid4java.discovery.DiscoveryException;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @author Sutra Zhou
@@ -37,10 +40,8 @@ public class CyberNekoDOMHtmlParserTest extends TestCase
      * @throws IOException
      * @throws DiscoveryException
      */
-    public void testParseHtml() throws IOException, DiscoveryException
-    {
-        String htmlData = IOUtils.toString(this.getClass().getClassLoader().getResourceAsStream(
-                "identityPage.html"));
+    public void testParseHtml() throws IOException, DiscoveryException {
+        String htmlData = loadResource("identityPage.html");
         HtmlResult result = new HtmlResult();
         parser.parseHtml(htmlData, result);
         assertEquals("http://www.example.com:8080/openidserver/users/myusername", result
@@ -61,8 +62,7 @@ public class CyberNekoDOMHtmlParserTest extends TestCase
     public void testParseHtmlWithXmlNamespace() throws IOException,
             DiscoveryException
     {
-        String htmlData = IOUtils.toString(this.getClass().getClassLoader().getResourceAsStream(
-                "identityPage-with-xml-namespace.html"));
+        String htmlData = loadResource("identityPage-with-xml-namespace.html");
         HtmlResult result = new HtmlResult();
         parser.parseHtml(htmlData, result);
         assertEquals("http://www.example.com:8080/openidserver/users/myusername", result
@@ -73,10 +73,16 @@ public class CyberNekoDOMHtmlParserTest extends TestCase
 
     public void testParseHtmlXXE() throws Exception
     {
-        String htmlData = IOUtils.toString(this.getClass().getClassLoader().getResourceAsStream(
-                "identityPageWithExternalEntityReference.html"));
+        String htmlData = loadResource("identityPageWithExternalEntityReference.html");
         parser.parseHtml(htmlData, new HtmlResult());
         // don't fail trying to read "/path/to/some/file" from the input data
     }
 
+    private String loadResource(String name) throws IOException{
+        final var resource = Objects.requireNonNull(getClass().getClassLoader().getResource(name));
+
+        try(final var reader = new BufferedReader(new InputStreamReader(resource.openStream()))) {
+            return reader.lines().collect(Collectors.joining("\n"));
+        }
+    }
 }

@@ -343,8 +343,7 @@ public class AuthRequest extends Message
 
         if (getRealm() != null)
         {
-            int validation = _realmVerifier.validate(
-                                getRealm(), getReturnTo(), compatibility);
+            int validation = _realmVerifier.validate(getRealm(), getReturnTo(), compatibility);
 
             if ( RealmVerifier.OK != validation )
             {

@@ -7,7 +7,7 @@ package org.openid4java.discovery;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openid4java.discovery.html.HtmlResolver;
-import org.openid4java.discovery.xri.LocalXriResolver;
+import org.openid4java.discovery.xri.XriDotNetProxyResolver;
 import org.openid4java.discovery.xri.XriResolver;
 import org.openid4java.discovery.yadis.YadisResolver;
 import org.openid4java.util.HttpFetcherFactory;
@@ -20,61 +20,36 @@ import java.util.regex.Pattern;
  */
 public class Discovery
 {
-    private static Log _log = LogFactory.getLog(Discovery.class);
+    private static final Log _log = LogFactory.getLog(Discovery.class);
     private static final boolean DEBUG = _log.isDebugEnabled();
 
-    private static final Pattern URL_PATTERN =
-            Pattern.compile("^https?://", Pattern.CASE_INSENSITIVE);
-    private static final Pattern XRI_PATTERN =
-            Pattern.compile("^[!=@\\$\\+\\(]", Pattern.CASE_INSENSITIVE);
+    private static final Pattern URL_PATTERN = Pattern.compile("^https?://", Pattern.CASE_INSENSITIVE);
+    private static final Pattern XRI_PATTERN = Pattern.compile("^[!=@\\$\\+\\(]", Pattern.CASE_INSENSITIVE);
 
-    private HtmlResolver _htmlResolver;
-    private YadisResolver _yadisResolver;
-    private XriResolver _xriResolver;
+    private final HtmlResolver _htmlResolver;
+    private final YadisResolver _yadisResolver;
+    private final XriResolver _xriResolver;
 
-    public Discovery(HtmlResolver htmlResolver, YadisResolver yadisResolver, XriResolver xriResolver)
-    {
+    public Discovery(HtmlResolver htmlResolver, YadisResolver yadisResolver, XriResolver xriResolver) {
         _htmlResolver = htmlResolver;
         _yadisResolver = yadisResolver;
         _xriResolver = xriResolver;
     }
 
-    public Discovery()
-    {
+    public Discovery() {
       this(
           new HtmlResolver(new HttpFetcherFactory()),
           new YadisResolver(new HttpFetcherFactory()),
-          new LocalXriResolver()
+          new XriDotNetProxyResolver()
       );
     }
 
-    public void setXriResolver(XriResolver xriResolver)
-    {
-        _xriResolver = xriResolver;
-    }
-
-    public void setYadisResolver(YadisResolver yadisResolver)
-    {
-        _yadisResolver = yadisResolver;
-    }
-
-    public void setHtmlResolver(HtmlResolver htmlResolver)
-    {
-        _htmlResolver = htmlResolver;
-    }
-
-    public Identifier parseIdentifier(String identifier)
-            throws DiscoveryException
-    {
+    public Identifier parseIdentifier(String identifier) throws DiscoveryException {
         return parseIdentifier(identifier, false);
     }
 
-    public Identifier parseIdentifier(String identifier,
-                                             boolean removeFragment)
-            throws DiscoveryException
-    {
-        try
-        {
+    public Identifier parseIdentifier(String identifier, boolean removeFragment) throws DiscoveryException {
+        try {
             // strip the xri:// prefix if it exists
             if (identifier.toLowerCase().startsWith("xri://"))
             {
@@ -166,11 +141,5 @@ public class Discovery
     {
         // don't follow redirects when doing RP discovery
         return yadisResolver.discoverRP(realm);
-    }
-
-    /* visible for testing */
-    public YadisResolver getYadisResolver()
-    {
-        return _yadisResolver;
     }
 }
