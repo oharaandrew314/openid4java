@@ -10,6 +10,8 @@ import org.openid4java.discovery.DiscoveryException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.Reader;
+import java.net.URL;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -79,9 +81,9 @@ public class CyberNekoDOMHtmlParserTest extends TestCase
     }
 
     private String loadResource(String name) throws IOException{
-        final var resource = Objects.requireNonNull(getClass().getClassLoader().getResource(name));
+        final URL resource = Objects.requireNonNull(getClass().getClassLoader().getResource(name));
 
-        try(final var reader = new BufferedReader(new InputStreamReader(resource.openStream()))) {
+        try(final BufferedReader reader = new BufferedReader(new InputStreamReader(resource.openStream()))) {
             return reader.lines().collect(Collectors.joining("\n"));
         }
     }

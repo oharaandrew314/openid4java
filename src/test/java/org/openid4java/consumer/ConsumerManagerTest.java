@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.net.URI;
 import java.net.URL;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -55,7 +56,7 @@ public class ConsumerManagerTest extends TestCase {
 		DiscoveryInformation info = manager.associate(Collections.singletonList(disc));
 
 		final AuthRequest result = manager.authenticate(info, "http://foo.bar/callback");
-		final var uri = result.getDestinationUrl(true);
+		final String uri = result.getDestinationUrl(true);
 		Assertions.assertThat(uri).contains("openid.return_to=http%3A%2F%2Ffoo.bar%2Fcallback");
 	}
 
@@ -65,7 +66,7 @@ public class ConsumerManagerTest extends TestCase {
 		DiscoveryInformation info = manager.associate(Collections.singletonList(disc));
 
 		final AuthRequest result = manager.authenticate(info, "nativeapp://callback");
-		final var uri = result.getDestinationUrl(true);
+		final String uri = result.getDestinationUrl(true);
 		Assertions.assertThat(uri).contains("openid.return_to=nativeapp%3A%2F%2Fcallback");
 	}
 	
